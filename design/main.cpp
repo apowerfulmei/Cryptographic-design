@@ -1,0 +1,142 @@
+#include <iostream>
+
+using namespace std;
+
+int n;
+unsigned short key[8];
+unsigned short x[4];
+unsigned short y[4];
+unsigned short Smap[16]={14,4,13,1,2,15,11,8,3,10,6,12,5,9,0,7};
+unsigned short Snap[16];
+char output[16]={'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
+void init()
+{
+    for(int i=0;i<16;i++) Snap[Smap[i]]=i;
+}
+void readKey()
+{
+    unsigned short k = 0x0;
+    char c;
+    int i=0;
+    while ((c = getchar()) != '\n')
+    {
+        if (c==' ')
+        {
+            break;
+        }
+        if (c >= '0' && c <= '9')
+            k = c - '0';
+        else if (c >= 'a' && c <= 'f')
+            k = c - 87;
+        key[i++]=k;
+    }
+}
+void readx()
+{
+    int i=0;
+    unsigned short k = 0x0;
+    char c;
+    while ((c = getchar()) != '\n')
+    {
+        if (c == ' ')
+        {
+            break;
+        }
+        if (c >= '0' && c <= '9')
+            k = c - '0';
+        else if (c >= 'a' && c <= 'f')
+            k = c - 87;
+        x[i++]=k;
+    }
+}
+void encrypt()
+{
+        for(int j=0;j<=3;j++)
+        {
+            //Òì»ò
+            x[0]^=key[j],x[1]^=key[j+1],x[2]^=key[j+2],x[3]^=key[j+3];
+            x[0]=Smap[x[0]];
+            x[1]=Smap[x[1]];
+            x[2]=Smap[x[2]];
+            x[3]=Smap[x[3]];
+        if(j==3) break;
+            for(int i=0;i<4;i++)
+            {
+
+                y[i]=0;
+                y[i]|=(x[0]>>(3-i))&1;
+                y[i]<<=1;
+                y[i]|=(x[1]>>(3-i))&1;
+                y[i]<<=1;
+                y[i]|=(x[2]>>(3-i))&1;
+                y[i]<<=1;
+                y[i]|=(x[3]>>(3-i))&1;
+
+            }
+            x[0]=y[0],x[1]=y[1],x[2]=y[2],x[3]=y[3];
+        }
+        x[0]^=key[4],x[1]^=key[5],x[2]^=key[6],x[3]^=key[7];
+}
+void decrypt()
+{
+
+        x[0]^=key[4],x[1]^=key[5],x[2]^=key[6],x[3]^=key[7];
+            x[0]=Snap[x[0]];
+            x[1]=Snap[x[1]];
+            x[2]=Snap[x[2]];
+            x[3]=Snap[x[3]];
+        for(int j=0;j<=2;j++)
+        {
+
+            //Òì»ò
+            x[0]^=key[3-j],x[1]^=key[4-j],x[2]^=key[5-j],x[3]^=key[6-j];
+            y[0]=0;
+            y[1]=0;
+            y[2]=0;
+            y[3]=0;
+            for(int i=0;i<4;i++)
+            {
+                y[0]<<=1;
+                y[0]|=(x[i]>>3)&1;
+                y[1]<<=1;
+                y[1]|=(x[i]>>2)&1;
+                y[2]<<=1;
+                y[2]|=(x[i]>>1)&1;
+                y[3]<<=1;
+                y[3]|=(x[i])&1;
+
+            }
+            x[0]=y[0],x[1]=y[1],x[2]=y[2],x[3]=y[3];
+            x[0]=Snap[x[0]];
+            x[1]=Snap[x[1]];
+            x[2]=Snap[x[2]];
+            x[3]=Snap[x[3]];
+        }
+        x[0]^=key[0],x[1]^=key[1],x[2]^=key[2],x[3]^=key[3];
+}
+int main()
+{
+    init();
+    cin>>n;
+    getchar();
+    for(int j=0;j<n;j++)
+    {
+        readKey();
+        readx();
+
+        encrypt();
+        putchar(output[x[0]]);
+        putchar(output[x[1]]);
+        putchar(output[x[2]]);
+        putchar(output[x[3]]);
+        x[3]^=0x0001;
+        decrypt();
+        putchar(' ');
+        putchar(output[x[0]]);
+        putchar(output[x[1]]);
+        putchar(output[x[2]]);
+        putchar(output[x[3]]);
+        putchar('\n');
+    }
+    return 0;
+}
